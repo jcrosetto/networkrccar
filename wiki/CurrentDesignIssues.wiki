@@ -11,7 +11,7 @@ This is a page containing current design issues.
   
   === What will receive internet signals on the car and how?===
 
-  ====Ideas=====
+  ====Ideas/Problems=====
      
   # Communication between a PDA (or some sort of small computer) and a wireless card or adapter that can connect to a cell phone network.
    * Can't find a PDA that supports a wireless card or adapter.
