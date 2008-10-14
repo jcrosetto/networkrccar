@@ -1,3 +1,6 @@
 #links we want to use
 
 http://www.networkcamerareviews.com/networkcameras/
+
+Specs on Axis 207W
+http://www.axis.com/files/datasheet/ds_207mw_combo_30820_en_0801_lo.pdf
