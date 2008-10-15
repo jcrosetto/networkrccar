@@ -4,4 +4,4 @@ The calendar has the project deadlines, meeting times, and important updates.
 
 http://www.google.com/calendar/embed?src=t5scu5bvfr9enq0fqqr7iaqbs4%40group.calendar.google.com&ctz=America/Los_Angeles&pvttk=dbbcfd929ab232d6089203e5a63cbba0
 
-<wiki:gadget url="http://ralph.feedback.googlepages.com/googlecalendarviewer.xml"  up_feed="http%3A%2F%2Fwww.google.com%2Fcalendar%2Ffeeds%2Ft5scu5bvfr9enq0fqqr7iaqbs4%2540group.calendar.google.com%2Fprivate-dbbcfd929ab232d6089203e5a63cbba0%2Fbasic" up_highlight="%23FF0000" up_borderStyle="solid" up_borderSize="2" up_synd="open" up_w="320" up_h="200" up_title="Google+Calendar+Viewer" up_border="%23ffffff%7C3px%2C1px+solid+%23999999" up_output="js"/>
+<wiki:gadget url="http://ralph.feedback.googlepages.com/googlecalendarviewer.xml"  up_feed="http%3A%2F%2Fwww.google.com%2Fcalendar%2Ffeeds%2Ft5scu5bvfr9enq0fqqr7iaqbs4%2540group.calendar.google.com%2Fprivate-dbbcfd929ab232d6089203e5a63cbba0%2Fbasic" up_highlight=%23FF0000 up_borderStyle=solid up_borderSize=2 />
