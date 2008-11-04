@@ -12,6 +12,10 @@ Axis 207W product page:
 
 http://www.axis.com/products/cam_207/
 
+Network Developers pages for Axis products
+
+http://www.axis.com/techsup/cam_servers/dev/index.htm
+
 Books:
     Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:
          Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
