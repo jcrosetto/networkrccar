@@ -1,8 +1,6 @@
 #summary Critical design issues that need to be solved.
 
-= Introduction =
-
-This is a page containing current design issues.
+This page contains current design issues.
 
 = Design Issues =
 
