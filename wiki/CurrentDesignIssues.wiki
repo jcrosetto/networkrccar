@@ -9,12 +9,12 @@ This is a page containing current design issues.
 ----
   == Issue 1 ==
   
-  === What will receive internet signals on the car and how?===
+  === How can the camera send signals to the car (acceleration and steering controls)?===
 
   ====Ideas/Problems=====
      
-  # Communication between a PDA (or some sort of small computer) and a wireless card or adapter that can connect to a cell phone network.
-   * Can't find a PDA that supports a wireless card or adapter.
+  # Use output for both.
+   * How can this be accomplished (e.g. using scripts)?
 
 
 ----
