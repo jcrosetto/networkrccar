@@ -4,9 +4,14 @@
 http://www.networkcamerareviews.com/networkcameras/
 
 
-  # Specs on Axis 207W:  http://www.axis.com/files/datasheet/ds_207mw_combo_30820_en_0801_lo.pdf
-  # Axis 207W product page:  http://www.axis.com/products/cam_207/
-  # Network Developers pages for Axis products:  http://www.axis.com/techsup/cam_servers/dev/index.htm
-  # Programmable single board computer:  http://www.coridiumcorp.com/catalog/product_info.php?products_id=64
-  # Books:      Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:
-           Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
+  # Specs on Axis 207W:  
+     http://www.axis.com/files/datasheet/ds_207mw_combo_30820_en_0801_lo.pdf
+  # Axis 207W product page:  
+     http://www.axis.com/products/cam_207/
+  # Network Developers pages for Axis products:  
+     http://www.axis.com/techsup/cam_servers/dev/index.htm
+  # Programmable single board computer:  
+     http://www.coridiumcorp.com/catalog/product_info.php?products_id=64
+  # Books:      
+      Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:       
+         Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
