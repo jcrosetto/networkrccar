@@ -15,3 +15,5 @@ http://www.networkcamerareviews.com/networkcameras/
   # Books:      
       Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:       
          Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
+  # Dragon 12 manual link
+      http://www.ece.utep.edu/courses/web3376/Dragon12.html
