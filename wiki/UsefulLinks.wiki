@@ -17,3 +17,5 @@ http://www.networkcamerareviews.com/networkcameras/
          Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
   # Dragon 12 manual link
       http://www.ece.utep.edu/courses/web3376/Dragon12.html
+  # Axis Developer Stuff
+      http://developer.axis.com/wiki/doku.php?id=contributions&s[]=network&s[]=camera
