@@ -19,7 +19,7 @@ http://www.networkcamerareviews.com/networkcameras/
       http://www.ece.utep.edu/courses/web3376/Dragon12.html
   # Axis Developer Stuff
       http://developer.axis.com/wiki/doku.php?id=contributions&s[]=network&s[]=camera
-  # Contains more output control stuff -- _very good_
+  # Contains more output control stuff -- _very useful_
       http://www.axis.com/techsup/cam_servers/dev/cam_http_api_2_copy_with_overlay_areazoom.htm#overview_versions
   # Example client/server app tutorial in C
       ftp://ftp.sas.com/techsup/download/SASC/share5958-59/S5959v2.pdf
