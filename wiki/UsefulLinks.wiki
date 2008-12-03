@@ -19,3 +19,5 @@ http://www.networkcamerareviews.com/networkcameras/
       http://www.ece.utep.edu/courses/web3376/Dragon12.html
   # Axis Developer Stuff
       http://developer.axis.com/wiki/doku.php?id=contributions&s[]=network&s[]=camera
+  # Contains more output control stuff -- _very good_
+      http://www.axis.com/techsup/cam_servers/dev/cam_http_api_2_copy_with_overlay_areazoom.htm#overview_versions
