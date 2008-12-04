@@ -25,5 +25,7 @@ http://www.networkcamerareviews.com/networkcameras/
       ftp://ftp.sas.com/techsup/download/SASC/share5958-59/S5959v2.pdf
   # good example client/server C application
       http://www.sfu.ca/~vwchu/cclientserver.html
+  # CSCE480 webpage
+      http://www.cs.plu.edu/~nelsonj/csce480/
   # good step by step approach to client/server in C
       http://www.informit.com/articles/article.aspx?p=22086
