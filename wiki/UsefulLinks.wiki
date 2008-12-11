@@ -15,8 +15,10 @@ http://www.networkcamerareviews.com/networkcameras/
   # Books:      
       Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:       
          Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
-      Haskell, Richard E. Design of embedded systems using 68HC12/11 microcontrollers. New Jersey: Prentice Hall, 200.
-      Barrett, Steven F, and Daniel J Pack. Embedded Systems: Design and Applications with the 68HC12 and HCS12. New Jersey: Prentice Hall, 2005.
+
+         Haskell, Richard E. Design of embedded systems using 68HC12/11 microcontrollers. New Jersey: Prentice Hall, 200.
+      
+         Barrett, Steven F, and Daniel J Pack. Embedded Systems: Design and Applications with the 68HC12 and HCS12. New Jersey: Prentice Hall, 2005.
   # Dragon 12 manual link
       http://www.ece.utep.edu/courses/web3376/Dragon12.html
   # Axis Developer Stuff
