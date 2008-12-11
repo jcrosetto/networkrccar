@@ -19,6 +19,8 @@ http://www.networkcamerareviews.com/networkcameras/
          Haskell, Richard E. Design of embedded systems using 68HC12/11 microcontrollers. New Jersey: Prentice Hall, 200.
       
          Barrett, Steven F, and Daniel J Pack. Embedded Systems: Design and Applications with the 68HC12 and HCS12. New Jersey: Prentice Hall, 2005.
+
+      Donahoo, Michael J, and Kenneth L Calvert. TCP/IP Sockets in C: Practice Guide for Programmers. California: Academic Press, 2001
   # Dragon 12 manual link
       http://www.ece.utep.edu/courses/web3376/Dragon12.html
   # Axis Developer Stuff
