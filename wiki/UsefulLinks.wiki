@@ -13,14 +13,11 @@ http://www.networkcamerareviews.com/networkcameras/
   # Programmable single board computer:  
      http://www.coridiumcorp.com/catalog/product_info.php?products_id=64
   # Books:      
-      Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:       
-         Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
-
-         Haskell, Richard E. Design of embedded systems using 68HC12/11 microcontrollers. New Jersey: Prentice Hall, 200.
-      
-         Barrett, Steven F, and Daniel J Pack. Embedded Systems: Design and Applications with the 68HC12 and HCS12. New Jersey: Prentice Hall, 2005.
-
-      Donahoo, Michael J, and Kenneth L Calvert. TCP/IP Sockets in C: Practice Guide for Programmers. California: Academic Press, 2001
+  # Lethbridge, Timothy C., and Robert Laganière. Object-Oriented Software Engineering:       
+  # Practical Software Development using UML and Java . New York: McGraw Hill, 2001.
+  # Haskell, Richard E. Design of embedded systems using 68HC12/11 microcontrollers. New Jersey: Prentice Hall, 200.
+  # Barrett, Steven F, and Daniel J Pack. Embedded Systems: Design and Applications with the 68HC12 and HCS12. New Jersey: Prentice Hall, 2005.
+  # Donahoo, Michael J, and Kenneth L Calvert. TCP/IP Sockets in C: Practice Guide for Programmers. California: Academic Press, 2001
   # Dragon 12 manual link
       http://www.ece.utep.edu/courses/web3376/Dragon12.html
   # Axis Developer Stuff
@@ -35,3 +32,7 @@ http://www.networkcamerareviews.com/networkcameras/
       http://www.cs.plu.edu/~nelsonj/csce480/
   # good step by step approach to client/server in C
       http://www.informit.com/articles/article.aspx?p=22086
+  # IP camera ebay
+      http://cgi.ebay.com/Axis-207W-Wireless-IP-Network-Camera-207-0241-004-NEW_W0QQitemZ320327121063QQcmdZViewItem
+  # IP camera IPCamera Deals 
+      http://www.ipcameradeals.com/axis-207w-network-came2070241004.html
