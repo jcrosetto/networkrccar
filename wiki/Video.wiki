@@ -1,1 +1,0 @@
-<wiki:video url="http://152.117.205.34/axis-cgi/mjpg/video.cgi?resolution=320x240"/>
