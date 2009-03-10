@@ -11,10 +11,10 @@ void main(void) {
   PLL_Init();
 
   /* set port B as output (LEDs) */
-  DDRJ |= 0x02;       // Port J1 as an output
-  PTJ &= ~0x02;       // Pull J1 low (enable LEDs)
+  DDRJ = 0xFF;       // Port J1 as an output
+  PTJ = 0x00;       // Pull J1 low (enable LEDs)
   DDRB  = 0xff;       // Port B is output
-  PORTB = 0x55;       // switch on every other LED
+  //PORTB = 0x55;       // switch on every other LED
   
   
   init_PWM();
