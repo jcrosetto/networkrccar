@@ -102,7 +102,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 */
 	private void initDisplay() {
 		if (image != null) {
-			Dimension imageSize = new Dimension(image.getWidth(this), image.getHeight(this));
+			Dimension imageSize = new Dimension(360, 350);//image.getWidth(this)
 			setPreferredSize(imageSize);
 			SwingUtilities.getWindowAncestor(this).pack();
 			initCompleted = true;
@@ -175,8 +175,9 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 */
 	public void paintComponent(Graphics g) { 
 		super.paintComponent(g);
+		int center = (getWidth()/2-160);
 		if (image != null) {
-			g.drawImage(image, 0, 0, this);
+			g.drawImage(image, center, 0, this);
 		}
 		
 		/* Get and display the frame rate -- disabled for regular use ***
@@ -213,14 +214,5 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 		parser.parse();		
 	}
 	
-	public static void main(String[] args) {
-		JFrame jframe = new JFrame();
-		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		AxisCamera axPanel = new AxisCamera();
-		new Thread(axPanel).start();
-		jframe.getContentPane().add(axPanel);
-		jframe.setSize(320, 240);
-		jframe.setTitle("Big Dog Cockpit");
-		jframe.setVisible(true);
-	}
+
 }//end Class
