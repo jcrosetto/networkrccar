@@ -18,6 +18,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -101,8 +103,19 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 *** set up the display ***
 	 */
 	private void initDisplay() {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        } catch (UnsupportedLookAndFeelException ex) {
+            ex.printStackTrace();
+        } catch (IllegalAccessException ex) {
+            ex.printStackTrace();
+        } catch (InstantiationException ex) {
+            ex.printStackTrace();
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
 		if (image != null) {
-			Dimension imageSize = new Dimension(360, 350);//image.getWidth(this)
+			Dimension imageSize = new Dimension(360, 250);//image.getWidth(this)
 			setPreferredSize(imageSize);
 			SwingUtilities.getWindowAncestor(this).pack();
 			initCompleted = true;
