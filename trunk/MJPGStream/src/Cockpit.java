@@ -1,9 +1,11 @@
 import java.awt.BorderLayout;
 import javax.swing.OverlayLayout;
 import java.awt.event.*;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 import javax.swing.JButton;
@@ -11,18 +13,22 @@ import javax.swing.JFrame;
 
 public class Cockpit implements KeyListener{
 	
-	private final String HOST = "152.117.205.34";
+	private final String HOST = "152.117.117.170";
 	private final int PORT = 5432;
 	
 	private int speed = 0;
 	private int key;
 	private int	turnKeyPressed = 0; //if turn key pressed wait for release
+	private int state = 0000; //really 0 but 0000 to show that figuratively we are using
+							  //state represented by a 4-bit binary number
+	private char lastChar;
+	private boolean isConnected = false;
 	
 	private JFrame jframe = new JFrame();
 	private AxisCamera axPanel = new AxisCamera();
 	
 	Socket controller;
-	DataInputStream input;
+	BufferedReader input;
     DataOutputStream output;
 	
 	/**
@@ -46,8 +52,8 @@ public class Cockpit implements KeyListener{
 		jframe.setVisible(true);
 		
 		//open socket and io streams
-		//openSocket();
-				
+		openSocket();	
+		
 		
 	}
 	
@@ -58,11 +64,14 @@ public class Cockpit implements KeyListener{
 		
 	    try {
 	           controller = new Socket(HOST, PORT);
-	           input = new DataInputStream(controller.getInputStream());
+	           //Socket connection created
+	           System.out.println("Connected to: "+HOST+" --> on port: "+PORT+"\n'q' to close connection");
+	           input = new BufferedReader(new InputStreamReader(controller.getInputStream()));
 	           output = new DataOutputStream(controller.getOutputStream());
+	           isConnected = true;
 	    }
 	    catch (IOException e) {
-	        System.out.println("Error opening socket: "+e);
+	        System.out.println("Error opening socket: "+HOST+" on port "+PORT+e);
 	    }
 		
 	}
@@ -75,6 +84,8 @@ public class Cockpit implements KeyListener{
 	           output.close();
 	           input.close();
 	           controller.close();
+	           isConnected = false;
+	           System.out.println("bye");
 	    } 
 	    catch (IOException e) {
 	       System.out.println(e);
@@ -115,17 +126,102 @@ public class Cockpit implements KeyListener{
     	key=e.getKeyCode();
     	if(turnKeyPressed > 0 && turnKeyPressed == key){
     		turnKeyPressed = 0;
+    		sendOut();
     	}
     }
 	
 	private void sendOut() {
 		// HERE will be where we calculate the correct state to send out and send it
-		System.out.println("Speed: "+speed);
-		System.out.println("Direction: "+turnKeyPressed);
+		//System.out.println("Speed: "+speed);
+		//System.out.println("Direction: "+turnKeyPressed);
+		
+		//set state
+		setState();
+		
+		//System.out.println("State: "+state);
+		
+		//should never happen...
+		if(state == 1111){
+			System.out.println("invalid state!");
+			close();
+			System.exit(0);
+		}
+		if(isConnected){
+			try{
+				output.writeBytes("data");
+				String responseLine;
+				while ((responseLine = input.readLine()) != null) {
+				    System.out.print("Server: " + responseLine);
+				}
+			}
+			catch(IOException e){
+				System.out.println("Failed to send command: "+e);
+			}
+		}
 	}
 
-	public void keyTyped(KeyEvent e) {
+	private void setState() {
 		// TODO Auto-generated method stub
+		if(speed == 0){
+			if (turnKeyPressed == 0)
+				state = 0000;
+			if (turnKeyPressed == 37)
+				state = 1;
+			if (turnKeyPressed == 39)
+				state = 10;
+		}
+		
+		else if(speed == 1){
+			if (turnKeyPressed == 0)
+				state = 11;
+			if (turnKeyPressed == 37)
+				state = 100;
+			if (turnKeyPressed == 39)
+				state = 101;
+		}
+		
+		else if(speed == 2){
+			if (turnKeyPressed == 0)
+				state = 110;
+			if (turnKeyPressed == 37)
+				state = 111;
+			if (turnKeyPressed == 39)
+				state = 1000;
+		}
+		
+		else if(speed == 3){
+			if (turnKeyPressed == 0)
+				state = 1001;
+			if (turnKeyPressed == 37)
+				state = 1010;
+			if (turnKeyPressed == 39)
+				state = 1011;
+		}
+		
+		else if(speed == 4){
+			if (turnKeyPressed == 0)
+				state = 1100;
+			if (turnKeyPressed == 37)
+				state = 1101;
+			if (turnKeyPressed == 39)
+				state = 1110;
+		}
+		
+		else
+			state = 1111;
+	}
+
+	
+	/**
+	 *** for now just close connection when 'q' is typed ***
+	 */
+	public void keyTyped(KeyEvent e) {
+		lastChar = e.getKeyChar();
+		System.out.print(lastChar);
+		if(lastChar=='q'){
+			System.out.println("\nClosing connection...");
+			close();
+		}
 		
 	}
 
