@@ -29,15 +29,22 @@ void HandleClient(int sock) {
 
 	/* Send bytes and check for more incoming data in loop */
 	while (received > 0) {
+		//testing println
+		buffer[received] = '\n';
+		printf("received: %s\n", buffer);
 		/* Send back received data */
 		if (send(sock, buffer, received, 0) != received) {
 			Crash("Failed to send bytes to client");
 		}
+
+		printf("called send\n");
+
 		/* Check for more data */
 		if ((received = recv(sock, buffer, BUFFSIZE, 0)) < 0) {
 			Crash("Failed to receive additional bytes from client");
 		}//end if
 	}//end while
+	printf("closing socket\n");
 	close(sock);
 }//end HandleClient
 
