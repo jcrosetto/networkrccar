@@ -13,7 +13,8 @@ import javax.swing.JFrame;
 
 public class Cockpit implements KeyListener{
 	
-	private final String HOST = "152.117.117.170";
+	//private final String HOST = "152.117.117.170";
+	private final String HOST = "127.0.0.1";
 	private final int PORT = 5432;
 	
 	private int speed = 0;
@@ -148,13 +149,14 @@ public class Cockpit implements KeyListener{
 		}
 		if(isConnected){
 			try{
-				output.writeBytes("data");
+				output.writeBytes("data\0");
 				String responseLine;
 				while ((responseLine = input.readLine()) != null) {
-				    System.out.print("Server: " + responseLine);
+				    System.out.print("Server: " + responseLine+"\n");
 				}
 			}
 			catch(IOException e){
+				isConnected = false;
 				System.out.println("Failed to send command: "+e);
 			}
 		}
