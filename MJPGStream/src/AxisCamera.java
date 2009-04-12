@@ -103,7 +103,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 *** set up the display ***
 	 */
 	private void initDisplay() {
-        try {
+       /* try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         } catch (UnsupportedLookAndFeelException ex) {
             ex.printStackTrace();
@@ -113,9 +113,10 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
             ex.printStackTrace();
         } catch (ClassNotFoundException ex) {
             ex.printStackTrace();
-        }
+        }*/
 		if (image != null) {
-			Dimension imageSize = new Dimension(360, 250);//image.getWidth(this)
+			//set preffered size of the image
+			Dimension imageSize = new Dimension(360, 240);//image.getWidth(this)
 			setPreferredSize(imageSize);
 			SwingUtilities.getWindowAncestor(this).pack();
 			initCompleted = true;
