@@ -26,7 +26,7 @@ import javax.swing.SwingUtilities;
 public class Cockpit implements KeyListener, ActionListener{
 	
 	//private final String HOST = "152.117.117.170";
-	private String host = "127.0.0.1";
+	//private String host = "127.0.0.1";
 	private int port = 5432;
 	final String VIEWPANEL = "View"; //name of main camera view tab
 	final String SETUPPANEL = "Setup"; //name of setup cam
@@ -42,8 +42,8 @@ public class Cockpit implements KeyListener, ActionListener{
 	private JFrame frame = new JFrame("Big Dog Cockpit");
 	private JPanel view = new JPanel();
 	private JPanel setup = new JPanel();
-	private JTextField hostnameField = new JTextField(host,16);
-	private JTextField portField = new JTextField(Integer.toString(port),4);
+	private JTextField hostnameField, mjpgStreamField, userField, passField;
+	private JTextField portField = new JTextField(Integer.toString(port),4); //refers to port server is listening on
 	private JButton button1;
 	private JButton button2 = new JButton("Update");
 	private AxisCamera axPanel = new AxisCamera();
@@ -59,9 +59,18 @@ public class Cockpit implements KeyListener, ActionListener{
 	 * @param port
 	 */
 	public Cockpit(){
+		//as soon as AxisCamera is instantiated, we can get these
+		hostnameField = new JTextField(axPanel.hostName,16);
+		mjpgStreamField = new JTextField(axPanel.mjpegStream,24);
+		userField = new JTextField(axPanel.user, 5);
+		passField = new JTextField(axPanel.pass, 5);
+		
+		//start out disconnected from mjpeg stream
+		//axPanel.disconnect();
+		System.out.println(axPanel.connected);
+		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addComponentsToPane(frame.getContentPane());
-		
 		frame.setVisible(true);
 		
 		//open socket and io streams
@@ -74,6 +83,9 @@ public class Cockpit implements KeyListener, ActionListener{
 		JTabbedPane tabbedPane = new JTabbedPane();
 		JLabel hst = new JLabel("hostname or IP address");
 		JLabel prt = new JLabel("port number");
+		JLabel mjpg = new JLabel("MJPEG Stream Source");
+		JLabel usr = new JLabel("Username");
+		JLabel pwd = new JLabel("Password");
 		button1 = new JButton("Connect");
 		button1.setActionCommand("toggleConnect");
 		button2.setActionCommand("update");
@@ -88,30 +100,43 @@ public class Cockpit implements KeyListener, ActionListener{
 		button2.addActionListener(this);
 		new Thread(axPanel).start();
 		
+		//add live view and connect toggler to view tab
 		view.add(axPanel);
 		view.add(button1);
 		button1.setAlignmentX((float) 0.5);
 
 		tabbedPane.setName("Big Dog Cockpit");
 		
+		//add components to setup tab
 		setup.add(hst);
-		setup.add(hostnameField);
-		setup.add(Box.createRigidArea(new Dimension(60,0)));
+		setup.add(Box.createRigidArea(new Dimension(56,0)));
 		setup.add(prt);
-		setup.add(Box.createRigidArea(new Dimension(250,0)));
+		setup.add(hostnameField);
 		setup.add(portField);
-		setup.add(Box.createRigidArea(new Dimension(50,0)));
+		setup.add(Box.createRigidArea(new Dimension(10,0)));
+		setup.add(mjpg);
+		setup.add(Box.createRigidArea(new Dimension(20,0)));
+		setup.add(mjpgStreamField);
+		setup.add(usr);
+		setup.add(Box.createRigidArea(new Dimension(20,0)));
+		setup.add(pwd);
+		setup.add(Box.createRigidArea(new Dimension(100,0)));
+		setup.add(userField);
+		setup.add(passField);
+		setup.add(Box.createRigidArea(new Dimension(100,0)));
 		setup.add(button2);
 		button2.setAlignmentX(0);
 		
+		//add tabs to tabbedPane
 		tabbedPane.add(VIEWPANEL, view);
 		tabbedPane.add(SETUPPANEL, setup);
 		
+		//set the dimension of the tab space
 		Dimension paneSize = new Dimension(360, 320);
 		pane.setPreferredSize(paneSize);
 		
+		//add tabbedpane to the pane, then give the connect button focus
 		pane.add(tabbedPane);
-		
 		button1.requestFocusInWindow();
 		
 		
@@ -123,9 +148,9 @@ public class Cockpit implements KeyListener, ActionListener{
 	private boolean openSocket(){
 		boolean returnee = false;
 	    try {
-	           controller = new Socket(host, port);
+	           controller = new Socket(axPanel.hostName, port);
 	           //Socket connection created
-	           System.out.println("Connected to: "+host+" --> on port: "+port+"\n'q' to close connection");
+	           System.out.println("Connected to: "+axPanel.hostName+" --> on port: "+port+"\n'q' to close connection");
 	           input = new BufferedReader(new InputStreamReader(controller.getInputStream()));
 	           output = new DataOutputStream(controller.getOutputStream());
 	           isConnected = true;
@@ -134,7 +159,7 @@ public class Cockpit implements KeyListener, ActionListener{
 	           returnee = true;
 	    }
 	    catch (IOException e) {
-	        System.out.println("Error opening socket: "+host+" on port "+port+" - "+e);
+	        System.out.println("Error opening socket: "+axPanel.hostName+" on port "+port+" - "+e);
 	    }
 	    
 		return returnee;
@@ -230,11 +255,11 @@ public class Cockpit implements KeyListener, ActionListener{
 		
 		if(isConnected){
 			try{
-				output.writeBytes(state+"\n");
+				output.writeBytes(state+""/*+"\n"*/);
 				output.flush();
 				String responseLine;
-				responseLine = input.readLine();
-				    System.out.print("Server Echo: " + responseLine+"\n");
+				//responseLine = input.readLine();
+				//    System.out.print("Server Echo: " + responseLine+"\n");
 				}
 			//}
 			catch(IOException e){
@@ -250,47 +275,47 @@ public class Cockpit implements KeyListener, ActionListener{
 	private void setState() {
 		if(speed == 0){
 			if (turnKeyPressed == 0)
-				state = 0000;
+				state = 0;
 			if (turnKeyPressed == 37)
 				state = 1;
 			if (turnKeyPressed == 39)
-				state = 10;
+				state = 2;
 		}
 		
 		else if(speed == 1){
 			if (turnKeyPressed == 0)
-				state = 11;
+				state = 3;
 			if (turnKeyPressed == 37)
-				state = 100;
+				state = 4;
 			if (turnKeyPressed == 39)
-				state = 101;
+				state = 5;
 		}
 		
 		else if(speed == 2){
 			if (turnKeyPressed == 0)
-				state = 110;
+				state = 6;
 			if (turnKeyPressed == 37)
-				state = 111;
+				state = 7;
 			if (turnKeyPressed == 39)
-				state = 1000;
+				state = 8;
 		}
 		
 		else if(speed == 3){
 			if (turnKeyPressed == 0)
-				state = 1001;
+				state = 9;
 			if (turnKeyPressed == 37)
-				state = 1010;
+				state = 10;
 			if (turnKeyPressed == 39)
-				state = 1011;
+				state = 11;
 		}
 		
 		else if(speed == 4){
 			if (turnKeyPressed == 0)
-				state = 1100;
+				state = 12;
 			if (turnKeyPressed == 37)
-				state = 1101;
+				state = 13;
 			if (turnKeyPressed == 39)
-				state = 1110;
+				state = 14;
 		}
 		
 		else
@@ -318,19 +343,26 @@ public class Cockpit implements KeyListener, ActionListener{
 		if("toggleConnect".equals(e.getActionCommand())){
 			if(isConnected){
 				System.out.println("Closing connection...");
+				//axPanel.disconnect();
 				closeSocket();
 			}
-			else
+			else{
+				//if(axPanel.connected){
+					//System.out.println("was connected");
+					//axPanel.disconnect();
+				//}
+				//System.out.println(axPanel.connected);
+				//axPanel.connect();
+				//System.out.println(axPanel.connected);
 				openSocket();
+			}
 		}//if connect/disconnect button in 1st pane
 		
 		else if("update".equals(e.getActionCommand())){
-			if(isConnected){
-				if(closeSocket()){
-					host = hostnameField.getText();
-					port = Integer.parseInt(portField.getText());
-				}
-			}//if isConnected
+			if(isConnected)
+				closeSocket();
+			axPanel.hostName = hostnameField.getText();
+			port = Integer.parseInt(portField.getText());
 			openSocket();
 		}//if update button in 2nd pane
 	}
