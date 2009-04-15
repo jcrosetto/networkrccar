@@ -42,7 +42,9 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	/*
 	 *** set up mjpeg stream's url and login info ***
 	 */
-	public String mjpegStream = "http://152.117.205.34/axis-cgi/mjpg/video.cgi?resolution=320x240";
+	public String hostName = "152.117.205.34"; //will use this as URL for server connection in Cockpit also
+	public String mjpegStream = "/axis-cgi/mjpg/video.cgi?resolution=320x240"; //this will be changable in Cockpit GUI
+	private String fullURL;
 	//public String mjpegStream = "http://localhost:2000/axis-cgi/mjpg/video.cgi?resolution=320x240"; //when outside plu's network
 	String user = "demo";
 	String pass = "demo";
@@ -52,7 +54,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 *** explaination *** 
 	 */
 	private Image image = null;
-	private boolean connected = false;
+	/*private*/ boolean connected = false;
 	private boolean initCompleted = false;
 	HttpURLConnection huc = null;
 	Runnable updater;
@@ -72,19 +74,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 		/**
 		 * See the stateChanged() function
 		 */
-		updater = new Runnable(){
-			
-			public void run() {
-				if (!initCompleted) {
-					initDisplay();
-				}
-				repaint();
-				for (int i = 0; i < fRates.length - 1; i++) {
-					fRates[i] = fRates[i + 1];
-				}
-				fRates[fRates.length - 1] = System.currentTimeMillis();	
-			}//end run
-		};//new Runnable
+
 	}//end constructor
 	
 	
@@ -126,7 +116,26 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	
 	public void connect() {
 		try {
-			URL u = new URL(mjpegStream);
+			
+			/**
+			 * See the stateChanged() function
+			 */
+			updater = new Runnable(){
+				
+				public void run() {
+					if (!initCompleted) {
+						initDisplay();
+					}
+					repaint();
+					for (int i = 0; i < fRates.length - 1; i++) {
+						fRates[i] = fRates[i + 1];
+					}
+					fRates[fRates.length - 1] = System.currentTimeMillis();	
+				}//end run
+			};//new Runnable
+			
+			fullURL = "http://"+hostName+mjpegStream; //hostName and mjpegStream are changable in GUI
+			URL u = new URL(fullURL);
 			huc = (HttpURLConnection) u.openConnection();
  
 			// if authorization is required set up the connection with the encoded authorization-information
@@ -174,6 +183,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	public void disconnect() {
 		try {
 			if (connected) {
+				updater = null;
 				parser.setCanceled(true);
 				connected = false;
 			}
@@ -225,7 +235,8 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 
 	public void run() {
 		connect();
-		parser.parse();		
+		if(connected)
+			parser.parse();		
 	}
 	
 
