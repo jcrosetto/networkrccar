@@ -15,7 +15,7 @@
 //these are for the alarm output
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <asm/arch/gpiodriver.h>
+//#include <asm/arch/gpiodriver.h>
 
 #define MAXPENDING 5    /* Max connection requests */
 #define BUFFSIZE 32
@@ -35,18 +35,18 @@ void pulse(int state){
 	printf("COMMAND RECEIVED: %d\n", state);
 	for(i = 0; i<state; i++){
 		printf("%d - ",i);
-		ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+		//ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
 		printf("%s","on_");
-		ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+		//ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
 		printf("%s\n","off");
 	}
 	//after the right amount of pulses have been sent
 	//sleep for 10 ms for microprocessor to know end of signal
 	printf("%s","END_");
-	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+	//ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
 	printf("%s","on_");
 	usleep(1);
-	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+	//ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
 	printf("%s","off\n");
 }
 
@@ -62,13 +62,14 @@ void HandleClient(int sock) {
 
 	/* Send bytes and check for more incoming data in loop */
 	while (received > 0) {
-		//printf("received: %s", buffer);
+		printf("received: %s", buffer);
 
+		buffer[received]='\0';
 		state = atoi(buffer);
 		pulse(state);
 		state = 0;
 
-		buffer[received]='\n';
+		//buffer[received]='\n';
 		//try this? buffer[received]='\0';
 
 		/* Send back received data */
