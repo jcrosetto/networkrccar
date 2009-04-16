@@ -15,10 +15,11 @@
 //these are for the alarm output
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include "bufferReceive.h"
 //#include <asm/arch/gpiodriver.h>
 
 #define MAXPENDING 5    /* Max connection requests */
-#define BUFFSIZE 32
+#define BUFFSIZE 3
 
 int fda;
 int inta = 1;
@@ -35,18 +36,18 @@ void pulse(int state){
 	printf("COMMAND RECEIVED: %d\n", state);
 	for(i = 0; i<state; i++){
 		printf("%d - ",i);
-		//ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+		ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
 		printf("%s","on_");
-		//ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+		ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
 		printf("%s\n","off");
 	}
 	//after the right amount of pulses have been sent
 	//sleep for 10 ms for microprocessor to know end of signal
 	printf("%s","END_");
-	//ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
 	printf("%s","on_");
 	usleep(1);
-	//ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
 	printf("%s","off\n");
 }
 
@@ -55,16 +56,18 @@ void HandleClient(int sock) {
 	int received = -1;
 	int state = 0;
 
-	/* Receive message */
-	if ((received = recv(sock, buffer, BUFFSIZE, 0)) < 0) {
+	/*
+	/* Receive message /
+	if ((received = recv(sock, &buffer, BUFFSIZE, 0)) < 0) {
 		Crash("Failed to receive initial bytes from client");
 	}
 
-	/* Send bytes and check for more incoming data in loop */
+	/* Send bytes and check for more incoming data in loop /
 	while (received > 0) {
-		printf("received: %s", buffer);
-
 		buffer[received]='\0';
+
+		printf("received: %s - #of bytes: %d\n", buffer, received);
+
 		state = atoi(buffer);
 		pulse(state);
 		state = 0;
@@ -72,16 +75,26 @@ void HandleClient(int sock) {
 		//buffer[received]='\n';
 		//try this? buffer[received]='\0';
 
-		/* Send back received data */
-		if (send(sock, buffer, received, 0) != received) {
-			Crash("Failed to send bytes to client");
-		}
-		/* Check for more data */
-		if ((received = recv(sock, buffer, BUFFSIZE, 0)) < 0) {
+		/* Send back received data /
+		//if (send(sock, buffer, received, 0) != received) {
+		//	Crash("Failed to send bytes to client");
+		//}
+		/* Check for more data /
+		if ((received = recv(sock, &buffer, BUFFSIZE, 0)) < 0) {
 			Crash("Failed to receive additional bytes from client");
 		}//end if
 	}//end while
+	*/
+
+	//replaces above commented out code
+	while(recv_all(sock, buffer)){
+		state = atoi(buffer);
+		pulse(state);
+		state = 0;
+	}
+
 	close(sock);
+	printf("closing socket");
 }//end HandleClient
 
 
