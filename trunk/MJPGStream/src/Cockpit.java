@@ -34,7 +34,7 @@ public class Cockpit implements KeyListener, ActionListener{
 	private int speed = 0;
 	private int key;
 	private int	turnKeyPressed = 0; //if turn key pressed wait for release
-	private int state = 0000; //really 0 but 0000 to show that figuratively we are using
+	private int state = 0; //really 0 but 0000 to show that figuratively we are using
 							  //state represented by a 4-bit binary number
 	private char lastChar;
 	private boolean isConnected = false;
@@ -255,8 +255,8 @@ public class Cockpit implements KeyListener, ActionListener{
 		
 		if(isConnected){
 			try{
-				output.writeBytes(state+""/*+"\n"*/);
-				output.flush();
+				output.writeBytes(state+"\n");
+				//output.flush();
 				String responseLine;
 				//responseLine = input.readLine();
 				//    System.out.print("Server Echo: " + responseLine+"\n");

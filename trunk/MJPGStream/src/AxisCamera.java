@@ -42,6 +42,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	/*
 	 *** set up mjpeg stream's url and login info ***
 	 */
+	//public String hostName = "127.0.0.1:2000";
 	public String hostName = "152.117.205.34"; //will use this as URL for server connection in Cockpit also
 	public String mjpegStream = "/axis-cgi/mjpg/video.cgi?resolution=320x240"; //this will be changable in Cockpit GUI
 	private String fullURL;
