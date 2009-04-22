@@ -15,12 +15,14 @@ import java.net.Socket;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Cockpit implements KeyListener, ActionListener{
@@ -30,6 +32,7 @@ public class Cockpit implements KeyListener, ActionListener{
 	private int port = 5432;
 	final String VIEWPANEL = "View"; //name of main camera view tab
 	final String SETUPPANEL = "Setup"; //name of setup cam
+	final private String[] PATHS = {"GUIspeed0.png", "GUIspeed1.png", "GUIspeed2.png", "GUIspeed3.png", "GUIspeed4.png", "GUIspeed5.png"};
 	
 	private int speed = 0;
 	private int key;
@@ -42,10 +45,13 @@ public class Cockpit implements KeyListener, ActionListener{
 	private JFrame frame = new JFrame("Big Dog Cockpit");
 	private JPanel view = new JPanel();
 	private JPanel setup = new JPanel();
+	private JPanel controlPane = new JPanel();
 	private JTextField hostnameField, mjpgStreamField, userField, passField;
 	private JTextField portField = new JTextField(Integer.toString(port),4); //refers to port server is listening on
 	private JButton button1;
 	private JButton button2 = new JButton("Update");
+	private ImageIcon[] speeds;
+	private JLabel speedGauge = new JLabel();
 	private AxisCamera axPanel = new AxisCamera();
 	
 	Socket controller;
@@ -60,6 +66,8 @@ public class Cockpit implements KeyListener, ActionListener{
 	 */
 	public Cockpit(){
 		//as soon as AxisCamera is instantiated, we can get these
+		speeds =  createImageIcon(PATHS, "speed");
+		speedGauge.setIcon(speeds[0]);
 		hostnameField = new JTextField(axPanel.hostName,16);
 		mjpgStreamField = new JTextField(axPanel.mjpegStream,24);
 		userField = new JTextField(axPanel.user, 5);
@@ -72,6 +80,7 @@ public class Cockpit implements KeyListener, ActionListener{
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addComponentsToPane(frame.getContentPane());
 		frame.setVisible(true);
+		frame.setResizable(false);
 		
 		//open socket and io streams
 		//openSocket();	
@@ -92,6 +101,7 @@ public class Cockpit implements KeyListener, ActionListener{
 		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
 		view.setLayout(new BoxLayout(view, BoxLayout.Y_AXIS));
 		setup.setLayout(new FlowLayout(FlowLayout.LEFT));
+		controlPane.setLayout(new BoxLayout(controlPane, BoxLayout.LINE_AXIS));
 		
 		//view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		button1.setFocusable(true);
@@ -100,10 +110,19 @@ public class Cockpit implements KeyListener, ActionListener{
 		button2.addActionListener(this);
 		new Thread(axPanel).start();
 		
-		//add live view and connect toggler to view tab
+		//setup controlPane
+		controlPane.add(Box.createHorizontalGlue());
+		controlPane.add(button1);
+		controlPane.add(Box.createRigidArea(new Dimension(40, 0)));
+		controlPane.add(speedGauge);
+		controlPane.add(Box.createRigidArea(new Dimension(5,0)));
+
+		
+		
+		//add live view and controlPane to view tab
 		view.add(axPanel);
-		view.add(button1);
-		button1.setAlignmentX((float) 0.5);
+		view.add(controlPane);
+		view.add(Box.createVerticalGlue());
 
 		tabbedPane.setName("Big Dog Cockpit");
 		
@@ -127,12 +146,16 @@ public class Cockpit implements KeyListener, ActionListener{
 		setup.add(button2);
 		button2.setAlignmentX(0);
 		
+		mjpgStreamField.setEditable(false);
+		userField.setEditable(false);
+		passField.setEditable(false);
+		
 		//add tabs to tabbedPane
 		tabbedPane.add(VIEWPANEL, view);
 		tabbedPane.add(SETUPPANEL, setup);
 		
 		//set the dimension of the tab space
-		Dimension paneSize = new Dimension(360, 320);
+		Dimension paneSize = new Dimension(350, 330);
 		pane.setPreferredSize(paneSize);
 		
 		//add tabbedpane to the pane, then give the connect button focus
@@ -185,6 +208,27 @@ public class Cockpit implements KeyListener, ActionListener{
 	    }
 	    return returnee;
 	}
+	
+	/**
+     * Creates an ImageIcon if the path is valid.
+     * @param String - resource path
+     * @param String - description of the file
+     */
+    protected ImageIcon[] createImageIcon(String[] path, String description) {
+        ImageIcon[] speedIcons = new ImageIcon[6];
+    	for(int i = 0; i <= 5; i++){
+        	java.net.URL imgURL = getClass().getResource(path[i]);
+        	if (imgURL != null) {
+        		speedIcons[i] = new ImageIcon(imgURL, description);
+        	} 
+        	else {
+        		System.err.println("Couldn't find file: " + path);
+        		return null;
+        	}
+        }//for
+    	
+    	return speedIcons;
+    }
 
 	/**
 	 *** main ***
@@ -214,13 +258,17 @@ public class Cockpit implements KeyListener, ActionListener{
     			sendOut();
     		}
     	}
+    	
+    	//change speed and then update gauge
     	if(key==38 && speed!=4){
     		speed++;
     		sendOut();
+    		speedGauge.setIcon(speeds[speed]);
     	}
     	if(key==40 && speed!=0){
     		speed--;
     		sendOut();
+    		speedGauge.setIcon(speeds[speed]);
     	}
         
     }

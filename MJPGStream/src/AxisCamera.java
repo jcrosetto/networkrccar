@@ -52,7 +52,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	String base64authorization = null; //initialized to null in case user and pass are null, we know they're not now.
 	
 	/*
-	 *** explaination *** 
+	 *** explanation *** 
 	 */
 	private Image image = null;
 	/*private*/ boolean connected = false;
