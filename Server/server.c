@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include "bufferReceive.h"
-//#include <asm/arch/gpiodriver.h>
+#include <asm/arch/gpiodriver.h>
 
 #define MAXPENDING 5    /* Max connection requests */
 #define BUFFSIZE 3
@@ -34,57 +34,42 @@ void Crash(char *err) { perror(err); exit(1); }
 void pulse(int state){
 	int i;
 	printf("COMMAND RECEIVED: %d\n", state);
+	int high, low;
 	for(i = 0; i<state; i++){
-		printf("%d - ",i);
-		ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
-		printf("%s","on_");
-		ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
-		printf("%s\n","off");
+		//printf("%d - ",i);
+		high = ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+		if(high < 0){
+			printf("error high");
+		}
+		usleep(1);
+		//printf("%s","on_");
+		low = ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+		if(low < 0){
+			printf("error low");
+		}
+		usleep(1);
+		//printf("%s\n","off");
 	}
 	//after the right amount of pulses have been sent
-	//sleep for 10 ms for microprocessor to know end of signal
-	printf("%s","END_");
-	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
-	printf("%s","on_");
-	usleep(1);
-	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
-	printf("%s","off\n");
+	//sleep for 20 ms for microprocessor to know end of signal
+	//printf("%s","END_");
+	high = ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+	if(high < 0){
+		printf("error high");
+	}
+	//printf("%s","on_");
+	usleep(20000);
+	low = ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+	if(low < 0){
+		printf("error low");
+	}
+	//printf("%s","off\n");
 }
 
 void HandleClient(int sock) {
 	char buffer[BUFFSIZE];
-	int received = -1;
+	//int received = -1;
 	int state = 0;
-
-	/*
-	/* Receive message /
-	if ((received = recv(sock, &buffer, BUFFSIZE, 0)) < 0) {
-		Crash("Failed to receive initial bytes from client");
-	}
-
-	/* Send bytes and check for more incoming data in loop /
-	while (received > 0) {
-		buffer[received]='\0';
-
-		printf("received: %s - #of bytes: %d\n", buffer, received);
-
-		state = atoi(buffer);
-		pulse(state);
-		state = 0;
-
-		//buffer[received]='\n';
-		//try this? buffer[received]='\0';
-
-		/* Send back received data /
-		//if (send(sock, buffer, received, 0) != received) {
-		//	Crash("Failed to send bytes to client");
-		//}
-		/* Check for more data /
-		if ((received = recv(sock, &buffer, BUFFSIZE, 0)) < 0) {
-			Crash("Failed to receive additional bytes from client");
-		}//end if
-	}//end while
-	*/
 
 	//replaces above commented out code
 	while(recv_all(sock, buffer)){
