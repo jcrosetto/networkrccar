@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -54,6 +55,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	/*
 	 *** explanation *** 
 	 */
+	private File noFeedImage = new File("noFeed.png");
 	private Image image = null;
 	/*private*/ boolean connected = false;
 	private boolean initCompleted = false;
@@ -94,17 +96,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 *** set up the display ***
 	 */
 	private void initDisplay() {
-       /* try {
-            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        } catch (UnsupportedLookAndFeelException ex) {
-            ex.printStackTrace();
-        } catch (IllegalAccessException ex) {
-            ex.printStackTrace();
-        } catch (InstantiationException ex) {
-            ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }*/
+   
 		if (image != null) {
 			//set preffered size of the image
 			Dimension imageSize = new Dimension(360, 240);//image.getWidth(this)
@@ -185,8 +177,10 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 		try {
 			if (connected) {
 				updater = null;
-				parser.setCanceled(true);
+				//parser.setCanceled(true);
 				connected = false;
+				parser.canceled = true;
+				System.out.println("Parser Canceled in disconnect: "+parser.canceled);
 			}
 		} catch (Exception e) {
 			System.out.println("Error disconnecting: "+e);
@@ -235,8 +229,11 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	}//end stateChanged
 
 	public void run() {
+		System.out.println("RUN is happening!");
 		connect();
+		System.out.println("after connect;");
 		if(connected)
+			parser.canceled= false;
 			parser.parse();		
 	}
 	

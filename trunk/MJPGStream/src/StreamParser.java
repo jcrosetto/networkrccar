@@ -186,13 +186,14 @@ public class StreamParser {
 	 *** canceled setter method ***
 	 * @param canceled
 	 */
-	public void setCanceled(boolean canceled) {
-		this.canceled = canceled;
+	public void setCanceled(boolean setCan) {
+		this.canceled = setCan;
 		if (canceled) {
 			try {
 				in.close();
 			} 
 			catch (IOException e) {
+				System.out.println("Closing input Stream: "+e);
 			}
 		}
 	}
