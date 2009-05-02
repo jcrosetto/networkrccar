@@ -14,7 +14,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
- 
+
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -44,43 +44,64 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 *** set up mjpeg stream's url and login info ***
 	 */
 	//public String hostName = "127.0.0.1:2000";
+	//public String hostName = "mcltcam.plu.edu";
 	public String hostName = "152.117.205.34"; //will use this as URL for server connection in Cockpit also
 	public String mjpegStream = "/axis-cgi/mjpg/video.cgi?resolution=320x240"; //this will be changable in Cockpit GUI
 	private String fullURL;
-	//public String mjpegStream = "http://localhost:2000/axis-cgi/mjpg/video.cgi?resolution=320x240"; //when outside plu's network
 	String user = "demo";
 	String pass = "demo";
 	String base64authorization = null; //initialized to null in case user and pass are null, we know they're not now.
-	
+
 	/*
-	 *** explanation *** 
+	 *** various images and booleans *** 
 	 */
 	private File noFeedImage = new File("noFeed.png");
 	private Image image = null;
-	/*private*/ boolean connected = false;
+	boolean connected = false;
 	private boolean initCompleted = false;
+	boolean killFeed;
+
+	//connect to camera for video feed with this
 	HttpURLConnection huc = null;
+
+	//for updating when a complete image is found
 	Runnable updater;
-	
-	long[] fRates = new long[10]; //used to calculate average framerate
- 
-	StreamParser parser; //instance of StreamParser used to get JPEG segments
-	
+
+	//used to calculate average framerate
+	long[] fRates = new long[10];
+
+	//instance of StreamParser used to get JPEG segments
+	StreamParser parser; 
+
+	//default constructor for startup with hardcoded addresses and stream source
 	public AxisCamera() {
+		killFeed = false;
 		// only use authorization if all informations are available
 		if (user != null && pass != null) {
 			base64authorization = encode(user, pass);
 		}
 		setForeground(Color.WHITE);
 		setFont(new Font("Dialog", Font.BOLD, 12));
- 
-		/**
-		 * See the stateChanged() function
-		 */
 
 	}//end constructor
 	
-	
+	//overloaded constructor
+	public AxisCamera(String gotHost, String gotStream, String gotUser, String gotPass) {
+		killFeed = false;
+		hostName = gotHost; //will use this as URL for server connection in Cockpit also
+		mjpegStream = gotStream; //this will be changable in Cockpit GUI
+		user = gotUser;
+		pass = gotPass;
+		// only use authorization if all informations are available
+		if (user != null && pass != null) {
+			base64authorization = encode(user, pass);
+		}
+		setForeground(Color.WHITE);
+		setFont(new Font("Dialog", Font.BOLD, 12));
+
+	}//end constructor
+
+
 	/*** encodes user and pass in Base64-encoding ***
 	 * @param usernm
 	 * @param passwd
@@ -96,25 +117,28 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	 *** set up the display ***
 	 */
 	private void initDisplay() {
-   
+
 		if (image != null) {
-			//set preffered size of the image
+			//set preferred size of the image
 			Dimension imageSize = new Dimension(360, 240);//image.getWidth(this)
 			setPreferredSize(imageSize);
 			SwingUtilities.getWindowAncestor(this).pack();
 			initCompleted = true;
 		}	
 	}//end initDisplay
-	
-	
+
+
+	/**
+	 *** method to start updater, create url connection, create parser ***
+	 */
 	public void connect() {
 		try {
-			
+
 			/**
 			 * See the stateChanged() function
 			 */
 			updater = new Runnable(){
-				
+
 				public void run() {
 					if (!initCompleted) {
 						initDisplay();
@@ -124,22 +148,23 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 						fRates[i] = fRates[i + 1];
 					}
 					fRates[fRates.length - 1] = System.currentTimeMillis();	
+
 				}//end run
 			};//new Runnable
-			
+
 			fullURL = "http://"+hostName+mjpegStream; //hostName and mjpegStream are changable in GUI
 			URL u = new URL(fullURL);
 			huc = (HttpURLConnection) u.openConnection();
- 
+
 			// if authorization is required set up the connection with the encoded authorization-information
 			if (base64authorization != null) {
 				huc.setDoInput(true);
 				huc.setRequestProperty("Authorization", base64authorization);
 				huc.connect();
 			}
-			
+
 			/*
-			 * Source: Carl Gould
+			 * resource: Carl Gould
 			 * the boundary used by the Axis 207w
 			 */
 			String boundary = "--myboundary"; //from VAPIX_3_HTTP_API_3_00.pdf section 5.2.4.4
@@ -152,14 +177,14 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 			} catch (Exception e) {
 				System.out.println("Error Matching Pattern: "+e);
 			}
- 
+
 			InputStream is = huc.getInputStream(); //input stream of bytes from HttpURLConnection
 			connected = true;
 			parser = new StreamParser(is, boundary); //new instance for MJPEGParser
 			parser.addChangeListener(this); //add listener to parser
-			} 
+		} 
 		// in case no connection exists wait and try again, instead of printing the error
-			catch (IOException e) { 
+		catch (IOException e) { 
 			try {
 				huc.disconnect();
 				Thread.sleep(60);
@@ -167,17 +192,19 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 				huc.disconnect();
 			}
 			connect(); //jump back up to the top and try again
-			} 
-			catch (Exception e) {
-				System.out.println("oops: "+e); //another exception is caught...
-			}
+		} 
+		catch (Exception e) {
+			System.out.println("oops: "+e); //another exception is caught...
+		}
 	}//end connect
-	
+
+	/**
+	 *** stop updater, stop parser ***
+	 */
 	public void disconnect() {
 		try {
 			if (connected) {
 				updater = null;
-				//parser.setCanceled(true);
 				connected = false;
 				parser.canceled = true;
 				System.out.println("Parser Canceled in disconnect: "+parser.canceled);
@@ -186,9 +213,9 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 			System.out.println("Error disconnecting: "+e);
 		}
 	}//end disconnect
-	
+
 	NumberFormat decFormat = DecimalFormat.getNumberInstance(); //general-purpose number in decimal form
-	
+
 	/**
 	 *** used to set the image on the panel ***
 	 */
@@ -198,7 +225,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 		if (image != null) {
 			g.drawImage(image, center, 0, this);
 		}
-		
+
 		/* Get and display the frame rate -- disabled for regular use ***
 		long timeBetweenFrames = 0;
 		for (int i = 0; i < fRates.length - 1; i++) {
@@ -212,7 +239,7 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 			g.drawString(fps, 0, g.getFontMetrics().getHeight());
 		}*/
 	}
-	
+
 	/**
 	 *** Listener of parser ***
 	 */
@@ -229,13 +256,22 @@ public class AxisCamera extends JComponent implements Runnable, ChangeListener {
 	}//end stateChanged
 
 	public void run() {
-		System.out.println("RUN is happening!");
+		//System.out.println("RUN is happening!"); test print
 		connect();
 		System.out.println("after connect;");
-		if(connected)
-			parser.canceled= false;
-			parser.parse();		
+		if(connected){
+			parser.canceled = false;
+			parser.parse();
+		}
+		// kill the thread if connection is lost
+		if(killFeed){
+			//System.out.println("KILL RUN"); test print
+			huc.disconnect();
+			parser.removeChangeListener(this);
+			image = null;
+			return;
+		}
 	}
-	
+
 
 }//end Class
