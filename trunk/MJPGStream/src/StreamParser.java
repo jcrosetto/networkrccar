@@ -20,7 +20,7 @@ public class StreamParser {
 	byte[] buffer;
 	int cur, len;
 	
-	boolean canceled = false;
+	boolean canceled;
 	
 	/**
 	 * Stores ChangeListeners listening for when there is a new segment to be processed
@@ -33,6 +33,7 @@ public class StreamParser {
 	 * @param boundary - The boundary marker for this MJPEG stream.
 	 */
 	public StreamParser(InputStream in, String boundary) {
+		canceled = false;
 		this.in = in;
 		this.boundary = boundary.getBytes();
 		buffer = new byte[INITIAL_BUFFER_SIZE];
@@ -50,7 +51,7 @@ public class StreamParser {
 		while ((b = in.read()) != -1 && !canceled) {
 			append(b);
 			if (checkBoundary()) {
-				// We found a boundary marker. Process the segment to find the JPEG image in it
+				//found the boundary process the segment to find the JPEG image in it
 				processSegment();
 				// And clear out our internal buffer.
 				cur = 0;
