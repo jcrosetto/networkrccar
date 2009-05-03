@@ -1,14 +1,12 @@
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-
-import net.java.games.input.*;
-import javax.swing.OverlayLayout;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,12 +22,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 
-public class Cockpit implements KeyListener, ActionListener {
+import net.java.games.input.ControllerEvent;
+import net.java.games.input.ControllerListener;
+
+public class Cockpit implements KeyListener, ActionListener, ControllerListener {
 
 	// private final String HOST = "152.117.117.170";
 	// private String host = "127.0.0.1";
@@ -45,8 +44,7 @@ public class Cockpit implements KeyListener, ActionListener {
 	private int speed = 0;
 	private int key;
 	private int turnKeyPressed = 0; // if turn key pressed wait for release
-	private int state = 0; // really 0 but 0000 to show that figuratively we are
-							// using
+	// using
 	// state represented by a 4-bit binary number
 	private char lastChar;
 	private boolean isConnected = false;
@@ -69,12 +67,15 @@ public class Cockpit implements KeyListener, ActionListener {
 	//two buttons needed
 	private JButton button1 = new JButton("Connect");
 	private JButton button2 = new JButton("Update");
+	private JButton useConButton = new JButton("Use Controller");
 	
 	//icon images are loaded in here and toggled based on state
 	private ImageIcon[] speeds;
 	private ImageIcon[] directions;
 	private ImageIcon[] logos;
 	private Thread feed;
+	private Thread cont;
+	private Control c;
 	
 	//JLabels used to hold icons
 	private JLabel speedGauge = new JLabel();
@@ -87,6 +88,10 @@ public class Cockpit implements KeyListener, ActionListener {
 	Socket controller;
 	BufferedReader input;
 	DataOutputStream output;
+	Control con;
+	int steer=0;
+	
+	SendCommand sc;
 
 	/**
 	 *** Constructor *** 
@@ -126,6 +131,8 @@ public class Cockpit implements KeyListener, ActionListener {
 
 		// open socket and io streams
 		// openSocket();
+		//cont = new Thread(c);
+		c = new Control(speeds, directions, speedGauge, leftInd, rightInd);
 
 	}
 
@@ -149,6 +156,7 @@ public class Cockpit implements KeyListener, ActionListener {
 		//add action descriptors
 		button1.setActionCommand("toggleConnect");
 		button2.setActionCommand("update");
+		useConButton.setActionCommand("toggleController");
 		
 		//set appropriate layouts for all the panes
 		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
@@ -162,6 +170,7 @@ public class Cockpit implements KeyListener, ActionListener {
 		button1.addKeyListener(this);
 		button1.addActionListener(this);
 		button2.addActionListener(this);
+		useConButton.addActionListener(this);
 		feed = new Thread(axPanel);
 		feed.start();
 
@@ -185,7 +194,9 @@ public class Cockpit implements KeyListener, ActionListener {
 		
 		//setup controlPane
 		controlPane.add(button1);
+		controlPane.add(useConButton);
 		button1.setAlignmentX((float) .5);
+		useConButton.setAlignmentX((float)0.6);
 		controlPane.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		//controlPane.setOpaque(false);
 		controlPane.setBackground(new Color(0x3B3B3B));
@@ -260,7 +271,8 @@ public class Cockpit implements KeyListener, ActionListener {
 				feed.start();
 				feedPane.add(axPanel);
 				feedPane.repaint();
-				Thread.currentThread().sleep(3000);
+				Thread.currentThread();
+				Thread.sleep(3000);
 
 				System.out.println("Re-Connect2, connected: "+axPanel.connected);
 				//System.out.println("Re-Connect, canceled: "+axPanel.parser.canceled);
@@ -274,6 +286,8 @@ public class Cockpit implements KeyListener, ActionListener {
 			input = new BufferedReader(new InputStreamReader(controller
 					.getInputStream()));
 			output = new DataOutputStream(controller.getOutputStream());
+			sc = new SendCommand(output);
+			c.setOut(sc);
 			isConnected = true;
 			button1.setText("Disconnect");
 			button1.setBackground(Color.red);
@@ -301,13 +315,13 @@ public class Cockpit implements KeyListener, ActionListener {
 			input.close();
 			controller.close();
 			isConnected = false;
-			
 			feedPane.remove(axPanel);
 			axPanel.parser.canceled = true;
 			axPanel.disconnect();
 			//System.out.println("Thread is alive: "+feed.getState());
 			axPanel.killFeed = true;
-			Thread.currentThread().sleep(3000);
+			Thread.currentThread();
+			Thread.sleep(3000);
 			System.out.println("After stop: "+feed.isAlive());
 			returnee = true;
 			button1.setText("Connect");
@@ -371,11 +385,14 @@ public class Cockpit implements KeyListener, ActionListener {
 			if (key == 37 || key == 39) {
 				if (turnKeyPressed == 0) {
 					turnKeyPressed = key;
+					if(key == 37){
+						steer = -1;
+					}
+					else{
+						steer=1;
+					}
+					
 					sendOut();
-					if(key == 37)
-						leftInd.setIcon(directions[1]);
-					else
-						rightInd.setIcon(directions[3]);
 				}
 			}
 
@@ -383,12 +400,10 @@ public class Cockpit implements KeyListener, ActionListener {
 			if (key == 38 && speed != 4) {
 				speed++;
 				sendOut();
-				speedGauge.setIcon(speeds[speed]);
 			}
 			if (key == 40 && speed != 0) {
 				speed--;
 				sendOut();
-				speedGauge.setIcon(speeds[speed]);
 			}
 
 		}// if isConnected
@@ -398,11 +413,10 @@ public class Cockpit implements KeyListener, ActionListener {
 	public void keyReleased(KeyEvent e) {
 		if (isConnected) {
 			key = e.getKeyCode();
-			if (turnKeyPressed > 0 && turnKeyPressed == key) {
+			if (turnKeyPressed > 0 && turnKeyPressed==key) {
 				turnKeyPressed = 0;
+				steer = 0;
 				sendOut();
-				leftInd.setIcon(directions[0]);
-				rightInd.setIcon(directions[2]);
 			}
 		}//is Connected
 	}
@@ -411,90 +425,18 @@ public class Cockpit implements KeyListener, ActionListener {
 	 *** send correct signal to server based on arrow-keyed events ***
 	 */
 	private void sendOut() {
-		// System.out.println("Speed: "+speed);
-		// System.out.println("Direction: "+turnKeyPressed);
-
-		// set state, that is the binary signal corresponding to current
-		// speed-direction
-		setState();
-
-		// System.out.println("State: "+state);
-
-		// should never happen...
-		if (state == 1111) {
-			System.out.println("invalid state!");
-			closeSocket();
-			System.exit(0);
+		if(steer == 0){
+			leftInd.setIcon(directions[0]);
+			rightInd.setIcon(directions[2]);
 		}
-
-		if (isConnected) {
-			try {
-				output.writeBytes(state + "\n");
-				// output.flush();
-				String responseLine;
-				// responseLine = input.readLine();
-				// System.out.print("Server Echo: " + responseLine+"\n");
-			}
-			// }
-			catch (IOException e) {
-				isConnected = false;
-				System.out.println("Failed to send command: " + e);
-			}
+		else if(steer == -1){
+			leftInd.setIcon(directions[1]);
 		}
-	}
-
-	/**
-	 ***based on speed and direction, the correct binary signal is set as the
-	 * state***
-	 */
-	private void setState() {
-		if (speed == 0) {
-			if (turnKeyPressed == 0)
-				state = 0;
-			if (turnKeyPressed == 37)
-				state = 1;
-			if (turnKeyPressed == 39)
-				state = 2;
+		else if(steer == 1){
+			rightInd.setIcon(directions[3]);
 		}
-
-		else if (speed == 1) {
-			if (turnKeyPressed == 0)
-				state = 3;
-			if (turnKeyPressed == 37)
-				state = 4;
-			if (turnKeyPressed == 39)
-				state = 5;
-		}
-
-		else if (speed == 2) {
-			if (turnKeyPressed == 0)
-				state = 6;
-			if (turnKeyPressed == 37)
-				state = 7;
-			if (turnKeyPressed == 39)
-				state = 8;
-		}
-
-		else if (speed == 3) {
-			if (turnKeyPressed == 0)
-				state = 9;
-			if (turnKeyPressed == 37)
-				state = 10;
-			if (turnKeyPressed == 39)
-				state = 11;
-		}
-
-		else if (speed == 4) {
-			if (turnKeyPressed == 0)
-				state = 12;
-			if (turnKeyPressed == 37)
-				state = 13;
-			if (turnKeyPressed == 39)
-				state = 14;
-		}
-
-		else
-			state = 1111;
+		speedGauge.setIcon(speeds[speed]);
+		sc.sendOut(steer, speed);
 	}
 
 	/**
@@ -518,7 +460,7 @@ public class Cockpit implements KeyListener, ActionListener {
 			if (isConnected) {
 				System.out.println("Closing connection...");
 				// axPanel.disconnect();
-				speed = 0; turnKeyPressed = 0; sendOut(); //send out a stopped state before disconnecting
+				speed = 0; steer = 0; sendOut(); //send out a stopped state before disconnecting
 				closeSocket();
 				speedGauge.setIcon(speeds[0]);
 				leftInd.setIcon(directions[0]);
@@ -530,6 +472,7 @@ public class Cockpit implements KeyListener, ActionListener {
 					closeSocket();
 				openSocket();
 			}
+			c.setCon(isConnected);
 		}// if connect/disconnect button in 1st pane
 
 		else if ("update".equals(e.getActionCommand())) {
@@ -538,64 +481,42 @@ public class Cockpit implements KeyListener, ActionListener {
 			port = Integer.parseInt(portField.getText());
 			openSocket();
 		}// if update button in 2nd pane
+		
+		else if (e.getActionCommand().equals("toggleController")){
+			if(cont != null && cont.isAlive()){
+				c.removeController();
+				/*try {
+					Thread.currentThread();
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}*/
+				while(cont.isAlive()){} // wait for thread to terminate
+				if(cont.isAlive()){
+					System.out.println("Error removing controller");
+				}
+				else
+					useConButton.setText("Use Controller");
+			}
+			else{
+				cont = new Thread(c);
+				cont.start();
+				useConButton.setText("Remove Controller");
+			}
+		}
 	}
-	
-	/**
-	 * Initializes a controller
-	 */
-    public void controller(){
-            Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
-            Controller pad = null;
-    for(int i =0;i<ca.length;i++){
+	@Override
+	public void controllerAdded(ControllerEvent arg0) {
+		if(!cont.isAlive()){
+			cont = new Thread(c);
+			cont.start();
+		}
+	}
 
-        if(ca[i].getName() == "Logitech RumblePad 2 USB"){
-            pad = ca[i];
-            break;
-        }
-    }
-    
-    if(pad == null){
-            System.out.println("Controller not found.");
-            return;
-    }
-            
-    Component[] components = pad.getComponents();
-    Rumbler[]  rumble = pad.getRumblers();
-    
-    while(true){
-            
-            pad.poll();
-            EventQueue queue = pad.getEventQueue();
-            
-            Event event = new Event();
-            
-            while(queue.getNextEvent(event)) {
-                            event.getNanos();
-                            Component comp = event.getComponent();
-                            comp.getName();
-                            float value = event.getValue(); 
-                            if(comp.isAnalog()) {
-                                    //value;
-                            } else {
-                                    if(value==1.0f) {
-                                            //append("On");
-                                    } else {
-                                            //buffer.append("Off");
-                                    }
-                            }
-                            //System.out.println(buffer.toString());
-            }
-            
-            try {
-                    Thread.sleep(10);
-            } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-    }
-    }
-
-
+	@Override
+	public void controllerRemoved(ControllerEvent arg0) {
+		con.removeController();
+	}	
 }
 	
