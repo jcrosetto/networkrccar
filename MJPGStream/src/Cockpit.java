@@ -4,6 +4,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
+import net.java.games.input.*;
 import javax.swing.OverlayLayout;
 import java.awt.event.*;
 import java.io.BufferedReader;
@@ -538,6 +539,63 @@ public class Cockpit implements KeyListener, ActionListener {
 			openSocket();
 		}// if update button in 2nd pane
 	}
+	
+	/**
+	 * Initializes a controller
+	 */
+    public void controller(){
+            Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
+
+            Controller pad = null;
+    for(int i =0;i<ca.length;i++){
+
+        if(ca[i].getName() == "Logitech RumblePad 2 USB"){
+            pad = ca[i];
+            break;
+        }
+    }
+    
+    if(pad == null){
+            System.out.println("Controller not found.");
+            return;
+    }
+            
+    Component[] components = pad.getComponents();
+    Rumbler[]  rumble = pad.getRumblers();
+    
+    while(true){
+            
+            pad.poll();
+            EventQueue queue = pad.getEventQueue();
+            
+            Event event = new Event();
+            
+            while(queue.getNextEvent(event)) {
+                            event.getNanos();
+                            Component comp = event.getComponent();
+                            comp.getName();
+                            float value = event.getValue(); 
+                            if(comp.isAnalog()) {
+                                    //value;
+                            } else {
+                                    if(value==1.0f) {
+                                            //append("On");
+                                    } else {
+                                            //buffer.append("Off");
+                                    }
+                            }
+                            //System.out.println(buffer.toString());
+            }
+            
+            try {
+                    Thread.sleep(10);
+            } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+            }
+    }
+    }
+
 
 }
 	
