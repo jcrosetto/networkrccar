@@ -19,12 +19,12 @@ public class SendCommand {
 		// System.out.println("Direction: "+turnKeyPressed);
 		speed = sp;
 		steer = st;
-		
-
+	
 		setState();
 
 		// System.out.println("State: "+state);
 		try {
+			System.out.println(state);
 			output.writeBytes(state + "\n");
 			// output.flush();
 			//String responseLine;

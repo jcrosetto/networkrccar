@@ -386,10 +386,10 @@ public class Cockpit implements KeyListener, ActionListener, ControllerListener 
 				if (turnKeyPressed == 0) {
 					turnKeyPressed = key;
 					if(key == 37){
-						steer = -1;
+						steer = 0; //left
 					}
 					else{
-						steer=1;
+						steer=6; //right
 					}
 					
 					sendOut();

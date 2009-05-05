@@ -8,10 +8,17 @@ import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 import net.java.games.input.Rumbler;
 
+/**
+ * Implements a thread for a controller.
+ * @author James Crosetto
+ *
+ */
 public class Control implements Runnable {
 	
 	int speed;
 	int steer;
+	int prevSteer;
+	int prevSpeed;
 
 	boolean isConnected = false;
 	boolean hasController = false;
@@ -31,6 +38,8 @@ public class Control implements Runnable {
 		rightInd = ri;
 		leftInd = li;
 		speedGauge = sg;
+		prevSteer = 3;//straight
+		prevSpeed = 0;//no speed
 	}
 
 	/**
@@ -106,41 +115,55 @@ public class Control implements Runnable {
 		//moving backward
 		if(isConnected){
 			if(direction.equals("x")){
-				if(value < -0.25 && steer != -1){
-					steer = -1;
-					sendOut();
-				}
-				else if (value > 0.25 && steer != 1){
-					steer = 1;
-					sendOut();
-				}
-				else if (value >= -0.25 && value <= 0.25 && steer != 0){
+				//full left
+				if(value < -0.75){
 					steer = 0;
+				}
+				else if (value < -0.5){
+					steer = 1;
+				}
+				else if (value < -0.25){
+					steer = 2;
+				}
+				else if (value < 0.25){
+					steer = 3;
+				}
+				else if (value < 0.5){
+					steer = 4;
+				}
+				else if (value < 0.75){
+					steer = 5;
+				}
+				else {
+					steer = 6;
+				}
+				
+				if(steer != prevSteer){
 					sendOut();
+					prevSteer = steer;
 				}
 			}
 			
 			//moving forward
-			if(direction.equals("y")){
-				//first speed
-				if(value >= -0.4 && value < -0.2 && speed != 1){
-					speed = 1;
-					sendOut();
-				}
-				else if (value >= -0.6 && value < -0.4 && speed != 2){
-					speed = 2;
-					sendOut();
-				}
-				else if (value >= -0.8 && value < -0.6 && speed != 3){
-					speed = 3;
-					sendOut();
-				}
-				else if (value >= -1 && value < -0.8 && speed != 4){
-					speed = 4;
-					sendOut();
-				}
-				else if (value >= -0.2 && speed != 0){
+			else if(direction.equals("y")){
+				//stopped
+				if(value > -0.2){
 					speed = 0;
+				}
+				else if (value > -0.4){
+					speed = 1;
+				}
+				else if (value > -0.6){
+					speed = 2;
+				}
+				else if (value > -0.8){
+					speed = 3;
+				}
+				else {
+					speed = 4;
+				}
+				if(prevSpeed != speed){
+					prevSpeed = speed;
 					sendOut();
 				}
 			}
