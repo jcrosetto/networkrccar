@@ -34,36 +34,27 @@ void Crash(char *err) { perror(err); exit(1); }
 void pulse(int state){
 	int i;
 	printf("COMMAND RECEIVED: %d\n", state);
-	int high, low;
-	for(i = 0; i<state; i++){
-		//printf("%d - ",i);
-		high = ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
-		if(high < 0){
-			printf("error high");
+
+	//initial signal marking the beginning of the sequence of signals
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+	usleep(1);
+
+	//six signals sent
+	//low order bits sent first
+	//e.g. if 010110=22 is sent, then the output is 011010
+	for(i = 0; i<6; i++){
+		if(state % 2 == 1){
+			ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+		}
+		else{
+			ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
 		}
 		usleep(1);
-		//printf("%s","on_");
-		low = ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
-		if(low < 0){
-			printf("error low");
-		}
-		usleep(1);
-		//printf("%s\n","off");
+		state /= 2;
 	}
-	//after the right amount of pulses have been sent
-	//sleep for 20 ms for microprocessor to know end of signal
-	//printf("%s","END_");
-	high = ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
-	if(high < 0){
-		printf("error high");
-	}
-	//printf("%s","on_");
-	usleep(20000);
-	low = ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
-	if(low < 0){
-		printf("error low");
-	}
-	//printf("%s","off\n");
+	//set the output low at the end
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
 }
 
 void HandleClient(int sock) {
