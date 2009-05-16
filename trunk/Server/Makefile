@@ -1,7 +1,7 @@
 AXIS_USABLE_LIBS = UCLIBC GLIBC
 include $(AXIS_TOP_DIR)/tools/build/Rules.axis
 
-PROGS     = server
+PROGS     = serverSixBit
 
 INSTDIR   = $(prefix)/bin/
 INSTMODE  = 0755
