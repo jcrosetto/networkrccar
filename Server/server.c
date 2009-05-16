@@ -32,29 +32,39 @@ void Crash(char *err) { perror(err); exit(1); }
  * turn alarm on and off specified amount of times
  */
 void pulse(int state){
-	int i;
+	int i, j;
 	printf("COMMAND RECEIVED: %d\n", state);
+	int speed, steer;
 
-	//initial signal marking the beginning of the sequence of signals
-	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
-	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
-	usleep(1);
+	speed = state >> 3; //high bits
+	steer = state-(speed << 3); //low order bits
 
 	//six signals sent
 	//low order bits sent first
 	//e.g. if 010110=22 is sent, then the output is 011010
-	for(i = 0; i<6; i++){
-		if(state % 2 == 1){
-			ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
-		}
-		else{
-			ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
-		}
-		usleep(1);
-		state /= 2;
+	for(i = 0; i<steer; i++){ //steering bits
+		ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+		for(j = 0; j < 5000; j++){} //pause
+		ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+		for(j = 0; j < 10000; j++){} //pause
 	}
-	//set the output low at the end
+
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+	usleep(5000); //sleep for at least 5 ms to mark end of steering sequence
 	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+	for(j = 0; j < 10000; j++){} //pause
+
+	for(i = 0; i<speed; i++){ //speed bits
+		ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+		for(j = 0; j < 5000; j++){} //pause
+		ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+		for(j = 0; j < 10000; j++){} //pause
+	}
+
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+	usleep(20000); //sleep for at least 20 ms to mark end of speed sequence
+	ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+	for(j = 0; j < 10000; j++){} //pause
 }
 
 void HandleClient(int sock) {
@@ -65,13 +75,21 @@ void HandleClient(int sock) {
 	//replaces above commented out code
 	while(recv_all(sock, buffer)){
 		state = atoi(buffer);
-		pulse(state);
+		if(state==100){//initialization
+			ioctl(fda, _IO(GPIO_IOCTYPE, IO_SETBITS), a);
+			usleep(50000); //sleep for at least 50 ms
+			ioctl(fda, _IO(GPIO_IOCTYPE, IO_CLRBITS), a);
+		}
+		else{
+			pulse(state);
+		}
 		state = 0;
 	}
 
 	close(sock);
 	printf("closing socket");
 }//end HandleClient
+
 
 
 int main(int argc, char *argv[]) {
