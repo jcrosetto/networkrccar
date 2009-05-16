@@ -175,14 +175,14 @@ public class Control implements Runnable {
 	 * Send the command.
 	 */
 	private void sendOut() {
-		if(steer == 0){
+		if(steer == 3){
 			leftInd.setIcon(directions[0]);
 			rightInd.setIcon(directions[2]);
 		}
-		else if(steer == -1){
+		else if(steer < 3){
 			leftInd.setIcon(directions[1]);
 		}
-		else if(steer == 1){
+		else if(steer > 3){
 			rightInd.setIcon(directions[3]);
 		}
 		speedGauge.setIcon(speeds[speed]);

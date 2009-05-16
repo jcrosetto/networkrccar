@@ -89,7 +89,7 @@ public class Cockpit implements KeyListener, ActionListener, ControllerListener 
 	BufferedReader input;
 	DataOutputStream output;
 	Control con;
-	int steer=0;
+	int steer=3;
 	
 	SendCommand sc;
 
@@ -293,6 +293,7 @@ public class Cockpit implements KeyListener, ActionListener, ControllerListener 
 			button1.setBackground(Color.red);
 			logo.setIcon(logos[1]);
 			returnee = true;
+			sc.sendOut(100, 0);
 		} catch (IOException e) {
 			System.out.println("Error opening socket: " + axPanel.hostName
 					+ " on port " + port + " - " + e);
@@ -415,7 +416,7 @@ public class Cockpit implements KeyListener, ActionListener, ControllerListener 
 			key = e.getKeyCode();
 			if (turnKeyPressed > 0 && turnKeyPressed==key) {
 				turnKeyPressed = 0;
-				steer = 0;
+				steer = 3;
 				sendOut();
 			}
 		}//is Connected
@@ -425,14 +426,14 @@ public class Cockpit implements KeyListener, ActionListener, ControllerListener 
 	 *** send correct signal to server based on arrow-keyed events ***
 	 */
 	private void sendOut() {
-		if(steer == 0){
+		if(steer == 3){
 			leftInd.setIcon(directions[0]);
 			rightInd.setIcon(directions[2]);
 		}
-		else if(steer == -1){
+		else if(steer == 0){
 			leftInd.setIcon(directions[1]);
 		}
-		else if(steer == 1){
+		else if(steer == 6){
 			rightInd.setIcon(directions[3]);
 		}
 		speedGauge.setIcon(speeds[speed]);

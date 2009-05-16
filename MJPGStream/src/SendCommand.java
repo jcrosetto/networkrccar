@@ -40,13 +40,10 @@ public class SendCommand {
 	/**
 	 ***based on speed and direction, the correct binary signal is set as the
 	 * state***
+	 * speeed is high 3 bits steering is low three bits
 	 */
 	private void setState() {
-		state = speed * 3;
-		if (steer == -1)
-			state += 1;
-		if (steer == 1)
-			state += 2;
+		state = (speed << 3) + steer;
 		// else
 		// state = 1111;
 	}
